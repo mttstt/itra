@@ -48,7 +48,7 @@ class Campagna(models.Model):
         """
  
         from controlli.models import Controllo
-        from elementtypes.models import ElementType, ValoreElementType
+        from elementtypes.models import ElementType, ValoreElementType, Minaccia
         from minacce.models import Minaccia
         from assets.models import Asset, NodoStruttura, StrutturaTemplate, NodoTemplate
         from scenari.models import Scenario
@@ -56,7 +56,7 @@ class Campagna(models.Model):
         new_campaign = self
 
         # Dizionari per mappare i vecchi ID ai nuovi oggetti clonati
-        scenario_map, minaccia_map, elementtype_map, controllo_map = {}, {}, {}, {}
+        scenario_map, minaccia_map, elementtype_map, controllo_map, template_map = {}, {}, {}, {}, {}
         # 1. Clona Scenari (nessuna dipendenza da altri modelli clonati)
         for obj in Scenario.objects.filter(campagna__isnull=True):
             old_id = obj.id
@@ -100,7 +100,43 @@ class Campagna(models.Model):
             obj.save()
             controllo_map[old_id] = obj
 
-        # 5. Popola relazioni di ElementType (M2M con Minacce e Valori Matrice)
+        # 5. Clona StrutturaTemplate e i loro nodi
+        for obj in StrutturaTemplate.objects.filter(campagna__isnull=True).prefetch_related('nodi_template'):
+            old_id = obj.id
+            original_nodes = list(obj.nodi_template.all())
+            
+            obj.id = None
+            obj._state.adding = True
+            obj.campagna = new_campaign
+            obj.cloned_from_id = old_id
+            obj.save()
+            template_map[old_id] = obj
+
+            node_map = {}
+            for node in sorted(original_nodes, key=lambda n: n.level):
+                old_node_id = node.id
+                node.id = None
+                node._state.adding = True
+                node.campagna = new_campaign
+                node.template = obj
+                if node.element_type_id in elementtype_map:
+                    node.element_type = elementtype_map[node.element_type_id]
+                node.parent = node_map.get(node.parent_id) if node.parent_id else None
+                node.save()
+                node_map[old_node_id] = node
+
+        # 6. Clona Asset
+        for obj in Asset.objects.filter(campagna__isnull=True):
+            old_id = obj.id
+            obj.id = None
+            obj._state.adding = True
+            obj.campagna = new_campaign
+            obj.cloned_from_id = old_id
+            if obj.template_da_applicare_id in template_map:
+                obj.template_da_applicare = template_map[obj.template_da_applicare_id]
+            obj.save()
+
+        # 7. Popola relazioni di ElementType (M2M con Minacce e Valori Matrice)
         valori_da_creare = []
         for old_et_id, new_et in elementtype_map.items():
             new_minacce = [minaccia_map[m.id] for m in original_elementtype_minacce[old_et_id] if m.id in minaccia_map]
