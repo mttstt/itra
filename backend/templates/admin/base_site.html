@@ -1,0 +1,161 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        /* Default Django Admin Header */
+        #header {
+            background-color: #36647A; /* Default blue for header */
+            color: #fff;
+            height: 40px;
+        }
+
+        /* Campaign Area Styles (Blue Tones) */
+        body.campaign-area #header {
+            background-color: #36647A; /* Consistent dark blue for header */
+        }
+        body.campaign-area #site-name a,
+        body.campaign-area #user-tools a {
+            color: #fff;
+            height: 40px;
+        }
+
+        /* Master Area Styles (Soft Orange Tones) */
+        body.master-area #header {
+            background-color: #FF9966; /* More pronounced orange for master area */
+        }
+        body.campaign-area .breadcrumbs {
+            background-color: #E0EBF2; /* Lighter blue for breadcrumbs */
+            color: #36647A; /* Dark blue for text */
+        }
+        body.master-area .breadcrumbs {
+            background-color: #FFCC99; /* Breadcrumbs background - soft orange */
+            color: #663300; /* Dark brown/orange for text */
+        }
+        body.campaign-area .breadcrumbs a {
+            color: #36647A; /* Link color within breadcrumbs */
+        }
+        body.master-area .breadcrumbs a {
+            color: #663300; /* Link color within breadcrumbs */
+        }
+        body.master-area #site-name a,
+        body.master-area #user-tools a,
+        body.master-area #user-tools {
+            color: #663300; /* Dark brown/orange for text in master header */
+        }
+        body.campaign-area .module h2,
+        body.campaign-area .inline-group h2,
+        body.campaign-area caption {
+            background-color: #417690; /* Module headers background - standard Django blue */
+            color: #fff; /* White text */
+        }
+        body.campaign-area .button,
+        body.campaign-area input[type=submit],
+        body.campaign-area input[type=button],
+        body.campaign-area .submit-row input[type=submit] {
+            background-color: #417690; /* Buttons background */
+            border-color: #417690;
+            color: #fff;
+        }
+        body.campaign-area .button:hover,
+        body.campaign-area input[type=submit]:hover,
+        body.campaign-area input[type=button]:hover,
+        body.campaign-area .submit-row input[type=submit]:hover {
+            background-color: #5B90B2; /* Buttons hover background - slightly lighter blue */
+            border-color: #5B90B2;
+        }
+        body.master-area .module h2,
+        body.master-area .inline-group h2,
+        body.master-area caption {
+            background-color: #FFDAB9; /* Module headers background - lighter soft orange */
+            color: #663300;
+        }
+        body.master-area .button,
+        body.master-area input[type=submit],
+        body.master-area input[type=button],
+        body.master-area .submit-row input[type=submit] {
+            background-color: #FFCC99; /* Buttons background */
+            border-color: #FFCC99;
+            color: #663300;
+        }
+        body.master-area .button:hover,
+        body.master-area input[type=submit]:hover,
+        body.master-area input[type=button]:hover,
+        body.master-area .submit-row input[type=submit]:hover {
+            background-color: #FFA07A; /* Buttons hover background - slightly deeper orange */
+            border-color: #FFA07A;
+        }
+        body.master-area .object-tools li a {
+            background-color: #FFCC99; /* Action buttons background */
+            color: #663300;
+        }
+        body.master-area .object-tools li a:hover {
+            background-color: #FFA07A;
+        }
+
+        /* Badges styling */
+        .master-badge, .master-list-badge {
+            background-color: #FFDAB9 !important; /* Lighter soft orange for MASTER badge */
+            color: #663300 !important;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            vertical-align: middle;
+            margin-right: 10px;
+            font-weight: bold; /* Ensure bold text */
+        }
+        body.master-area fieldset .fieldset-heading, 
+        body.master-area fieldset .inline-heading, 
+        body.master-area .collapse summary, /* Rimosso :not(.inline-related) per includere gli inline */
+        body.master-area .selector-available-title,
+        body.master-area .selector-chosen-title {
+            background-color: #FFA07A;
+            color: #663300; /* Colore testo coerente con l'area master */
+        }
+
+        .campaign-badge {
+            background-color: #417690 !important; /* Original blue for CAMPAIGN badge */
+            color: white !important;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            vertical-align: middle;
+            margin-right: 10px;
+            font-weight: bold; /* Ensure bold text */
+        }
+    </style>
+{% endblock %}
+
+{% block bodyclass %}
+    {% if current_campagna %}campaign-area{% else %}master-area{% endif %}
+{% endblock %}
+
+{% block title %}
+    {% if current_campagna %}
+        {{ current_campagna.descrizione }} | {{ site_title|default:_('Amministrazione ITRA') }}
+    {% else %}
+        Area Master | {{ site_title|default:_('Amministrazione ITRA') }}
+    {% endif %}
+{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">
+            {% if current_campagna %}
+                <span class="campaign-badge">CAMPAGNA</span>
+                {{ current_campagna.descrizione }}
+            {% else %}
+                 <span class="master-badge">MASTER</span>
+                 Area Master
+            {% endif %}
+        </a>
+    </h1>
+{% endblock %}
+
+{% block userlinks %}
+    {% if current_campagna %}
+        <a href="{% url 'admin:index' %}">Torna ad Area Master</a> /
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

@@ -1,0 +1,8 @@
+/* Nasconde le icone di aggiunta/modifica per il campo 'minacce' nell'admin di ElementType */
+/* Questo selettore mira specificamente al div che contiene il campo 'minacce' */
+.field-minacce .related-widget-wrapper .add-another,
+.field-minacce .related-widget-wrapper .related-lookup,
+/* Nasconde le icone per il campo 'component_element_types' */
+.field-component_element_types .related-widget-wrapper .add-another {
+    display: none !important;
+}

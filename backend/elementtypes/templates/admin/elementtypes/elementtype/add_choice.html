@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural }}</a>
+    &rsaquo; {% translate 'Add' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h1>{{ title }}</h1>
+        <p>{% translate "Seleziona come vuoi creare il nuovo ElementType:" %}</p>
+        <ul>
+            <li>
+                <a href="{{ add_base_url }}" class="button">
+                    {% translate "Crea come ElementType Base (matrice definita manualmente)" %}
+                </a>
+            </li>
+            <li>
+                <a href="{{ add_derived_url }}" class="button">
+                    {% translate "Crea come ElementType Derivato (matrice aggregata automaticamente)" %}
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

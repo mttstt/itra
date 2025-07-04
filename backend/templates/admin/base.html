@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /*
+     * Stili condizionali per distinguere il contesto Master da quello di Campagna.
+     * Questi stili vengono applicati globalmente a tutte le pagine dell'admin.
+    */
+    {% if current_campagna %}
+        /* Stili per il contesto di CAMPAGNA (verde) */
+        .module caption,
+        fieldset .fieldset-heading,
+        fieldset .inline-heading,
+        :not(.inline-related) .collapse summary,
+        .submit-row {
+            background-color: #e0ffe0; /* Verde chiaro per la campagna */
+            border-color: #c0e0c0;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+    {% else %}
+        /* Stili per il contesto MASTER (grigio) */
+        .module caption,
+        fieldset .fieldset-heading,
+        fieldset .inline-heading,
+        :not(.inline-related) .collapse summary,
+        .submit-row {
+            background-color: #f0f0f0; /* Grigio chiaro per i master */
+            border-color: #ddd;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+    {% endif %}
+</style>
+{% endblock %}
