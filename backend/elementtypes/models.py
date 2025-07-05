@@ -90,6 +90,28 @@ class ElementType(models.Model):
                 )
                 raise ValidationError({'is_enabled': error_message})
 
+    def get_dimensione_matrice_display(self):
+        """
+        Calcola e restituisce una stringa che rappresenta la dimensione della matrice
+        (Minacce x Controlli). Gestisce sia i tipi base che quelli derivati.
+        Per una performance ottimale, il chiamante dovrebbe pre-caricare le relazioni
+        con prefetch_related.
+        """
+        if self.is_base:
+            num_minacce = self.minacce.count()
+            num_controlli = self.controls_assigned_to_elementtype.count()
+            return f"{num_minacce} x {num_controlli}" if num_minacce or num_controlli else "N/D"
+        else:
+            # Per i tipi derivati, aggrega le minacce e i controlli dai componenti.
+            # Questo si basa sui dati pre-caricati per l'efficienza.
+            components = self.component_element_types.all()
+            if not components:
+                return "N/D (derivato)"
+            
+            aggregated_minacce_ids = set().union(*(c.minacce.values_list('id', flat=True) for c in components))
+            aggregated_controlli_ids = set().union(*(c.controls_assigned_to_elementtype.values_list('id', flat=True) for c in components))
+            return f"{len(aggregated_minacce_ids)} x {len(aggregated_controlli_ids)} (A)"
+
     class Meta:
         verbose_name = "Element Type"
         verbose_name_plural = "Element Types"

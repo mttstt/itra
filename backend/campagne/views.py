@@ -4,6 +4,7 @@ from .serializers import CampagnaSerializer
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
+from assets.models import NodoTemplate, NodoStruttura
 
 class CampagnaViewSet(viewsets.ModelViewSet):
     queryset = Campagna.objects.all()
@@ -28,6 +29,8 @@ def campagna_dashboard_view(request, campagna_id):
     # Aggiungi i conteggi per assets e template di struttura
     campagna.assets_count = campagna.assets.count()
     campagna.strutture_template_count = campagna.templates_struttura.count()
+    campagna.noditemplate_count = NodoTemplate.objects.filter(campagna=campagna).count()
+    campagna.nodistruttura_count = NodoStruttura.objects.filter(campagna=campagna).count()
 
     
     context = {

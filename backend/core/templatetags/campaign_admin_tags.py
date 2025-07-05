@@ -10,6 +10,9 @@ CAMPAIGN_AWARE_MODELS = [
     'elementtype',
     'minaccia',
     'scenario',
+    'strutturatemplate',
+    'nodotemplate',
+    'nodostruttura',
 ]
 
 @register.simple_tag

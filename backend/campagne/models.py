@@ -101,29 +101,31 @@ class Campagna(models.Model):
             controllo_map[old_id] = obj
 
         # 5. Clona StrutturaTemplate e i loro nodi
-        for obj in StrutturaTemplate.objects.filter(campagna__isnull=True).prefetch_related('nodi_template'):
-            old_id = obj.id
-            original_nodes = list(obj.nodi_template.all())
+        for master_template in StrutturaTemplate.objects.filter(campagna__isnull=True).prefetch_related('nodi_template'):
+            old_id = master_template.id
+            original_nodes = list(master_template.nodi_template.all())
             
-            obj.id = None
-            obj._state.adding = True
-            obj.campagna = new_campaign
-            obj.cloned_from_id = old_id
-            obj.save()
-            template_map[old_id] = obj
+            # Clona l'oggetto StrutturaTemplate
+            master_template.id = None
+            master_template._state.adding = True
+            master_template.campagna = new_campaign
+            master_template.cloned_from_id = old_id
+            master_template.save()
+            new_template = master_template
+            template_map[old_id] = new_template
 
+            # Clona i nodi del template in modo sicuro, senza modificare gli originali
             node_map = {}
             for node in sorted(original_nodes, key=lambda n: n.level):
                 old_node_id = node.id
-                node.id = None
-                node._state.adding = True
-                node.campagna = new_campaign
-                node.template = obj
-                if node.element_type_id in elementtype_map:
-                    node.element_type = elementtype_map[node.element_type_id]
-                node.parent = node_map.get(node.parent_id) if node.parent_id else None
-                node.save()
-                node_map[old_node_id] = node
+                cloned_parent = node_map.get(node.parent_id) if node.parent_id else None
+                cloned_element_type = elementtype_map.get(node.element_type_id)
+
+                if cloned_element_type:
+                    new_node = NodoTemplate.objects.create(
+                        template=new_template, element_type=cloned_element_type, parent=cloned_parent, campagna=new_campaign
+                    )
+                    node_map[old_node_id] = new_node
 
         # 6. Clona Asset
         for obj in Asset.objects.filter(campagna__isnull=True):
