@@ -25,7 +25,7 @@ class NodoTemplate(MPTTModel):
     element_type = models.ForeignKey(ElementType, on_delete=models.CASCADE)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     campagna = models.ForeignKey(Campagna, on_delete=models.CASCADE, related_name='+', null=True, blank=True)
-    history = HistoricalRecords()
+    history = HistoricalRecords(excluded_fields=['lft', 'rght', 'tree_id', 'level'])
 
     class MPTTMeta:
         order_insertion_by = ['id']
@@ -87,7 +87,7 @@ class NodoStruttura(MPTTModel):
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     nome_specifico = models.CharField("Nome Specifico", max_length=255, blank=True)
     campagna = models.ForeignKey(Campagna, on_delete=models.CASCADE, related_name='+', null=True, blank=True)
-    history = HistoricalRecords()
+    history = HistoricalRecords(excluded_fields=['lft', 'rght', 'tree_id', 'level'])
 
     class MPTTMeta:
         order_insertion_by = ['id']

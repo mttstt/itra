@@ -14,7 +14,6 @@ class CampagnaAdmin(CustomDeleteActionMixin, ImportExportModelAdmin, SimpleHisto
     list_display = ('anno', 'descrizione', 'status', 'data_inizio', 'data_fine', 'dashboard_link', 'delete_button')
     list_filter = ('anno', 'status') # Removed MasterCampaignFilter
     search_fields = ('anno', 'descrizione')
-    readonly_fields = ('assets_count', 'strutture_template_count') # Make the counts read-only
     
 
 

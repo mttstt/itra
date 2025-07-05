@@ -153,14 +153,3 @@ class Campagna(models.Model):
 
         # 8. Crea tutti i valori delle matrici in una sola query per efficienza
         ValoreElementType.objects.bulk_create(valori_da_creare)
-
-    @property
-    def assets_count(self):
-        """Returns the number of assets related to this campaign."""
-        return self.assets.count()
-
-    @property
-    def strutture_template_count(self):
-        """Returns the number of struttura templates related to this campaign."""
-        from assets.models import StrutturaTemplate
-        return StrutturaTemplate.objects.filter(campagna=self).count()
