@@ -1,7 +1,7 @@
 from django.contrib import admin
 from mptt.admin import DraggableMPTTAdmin
 from .models import Asset, NodoStruttura, StrutturaTemplate, NodoTemplate
-from core.admin_mixins import CustomDeleteActionMixin
+from core.admin_mixins import CustomDeleteActionMixin, MasterAdminMixin
 from core.admin_filters import MasterCampaignFilter
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -15,14 +15,14 @@ class StrutturaTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, admin.Mo
 
 
 @admin.register(NodoTemplate)
-class NodoTemplateAdmin(DraggableMPTTAdmin):
-    list_display = ('tree_actions', 'indented_title', 'template', 'element_type', 'campagna')
+class NodoTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, DraggableMPTTAdmin):
+    list_display = ('tree_actions', 'indented_title', 'template', 'element_type', 'campagna', 'delete_button')
     list_display_links = ('indented_title',)
-    list_filter = ('template', 'campagna')
+    list_filter = (MasterCampaignFilter, 'template')
     readonly_fields = ('campagna',)
 
-@admin.register(Asset)
-class AssetAdmin(CustomDeleteActionMixin, SimpleHistoryAdmin, admin.ModelAdmin):
+@admin.register(Asset) # Aggiunto MasterAdminMixin per coerenza
+class AssetAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, admin.ModelAdmin):
     list_display = ('nome', 'status', 'template_da_applicare', 'campagna', 'cmdb', 'delete_button')
     list_filter = (MasterCampaignFilter, 'status', 'campagna', 'legal_entity')  # Add 'legal_entity' to the filter
     search_fields = ('nome', 'descrizione', 'cmdb')  # Include 'cmdb' in search fields
@@ -32,9 +32,9 @@ class AssetAdmin(CustomDeleteActionMixin, SimpleHistoryAdmin, admin.ModelAdmin):
 
 
 @admin.register(NodoStruttura)
-class NodoStrutturaAdmin(DraggableMPTTAdmin):
-    list_display = ('tree_actions', 'indented_title', 'asset', 'element_type', 'campagna')
+class NodoStrutturaAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, DraggableMPTTAdmin):
+    list_display = ('tree_actions', 'indented_title', 'asset', 'element_type', 'campagna', 'delete_button')
     list_display_links = ('indented_title',)
-    list_filter = ('asset', 'campagna')
+    list_filter = (MasterCampaignFilter, 'asset')
     raw_id_fields = ('asset', 'element_type', 'parent')
     readonly_fields = ('campagna',)

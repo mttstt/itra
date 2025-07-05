@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'minacce.apps.MinacceConfig',
     'controlli.apps.ControlliConfig',
     'elementtypes.apps.ElementtypesConfig',
-    'homepage.apps.HomepageConfig', # Nuova app per la homepage
+    'homepage.apps.HomepageConfig',
+    'assets.apps.AssetsConfig',
     'core.apps.CoreConfig',  
 ]
 

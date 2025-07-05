@@ -25,6 +25,9 @@ def campagna_dashboard_view(request, campagna_id):
     campagna.minacce_count = campagna.minacce.count()
     campagna.scenari_count = campagna.scenari.count()
     campagna.elementtypes_count = campagna.elementtypes.count()
+    # Aggiungi i conteggi per assets e template di struttura
+    campagna.assets_count = campagna.assets.count()
+    campagna.strutture_template_count = campagna.templates_struttura.count()
 
     
     context = {
