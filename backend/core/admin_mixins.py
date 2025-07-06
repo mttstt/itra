@@ -168,12 +168,6 @@ class MasterAdminMixin:
         """
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        """
-        La logica di filtraggio è ora gestita in get_form.
-        """
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
-
     def response_add(self, request, obj, post_url_continue=None):
         """
         Gestisce il reindirizzamento dopo l'aggiunta di un oggetto,

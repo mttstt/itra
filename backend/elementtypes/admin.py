@@ -19,36 +19,55 @@ class ElementTypeAdmin(CustomDeleteActionMixin, MasterAdminMixin, admin.ModelAdm
     list_display = ('nome', 'is_base', 'dimensione_matrice', 'is_enabled', 'delete_button')
     list_filter = (MasterCampaignFilter, 'is_enabled', 'campagna')
     search_fields = ('nome', 'descrizione')
-    readonly_fields = ('campagna', 'is_base',)
+    readonly_fields = ('campagna', 'is_base')
 
     filter_horizontal = ('minacce', 'component_element_types',)
 
+    # Rimuoviamo i fieldsets statici perché ora li gestiamo dinamicamente con get_fieldsets
+    # fieldsets = (...)
 
-    fieldsets = (
-        (None, {
-            'fields': ('nome', 'descrizione', 'campagna', 'is_base', 'is_enabled'),
-        }),
-        ('Configurazione Minacce (righe)', {
-            'classes': ('collapse',),
-            'fields': ('minacce',)
-        }),
-        ('Configurazione Controlli (colonne)', {
-            'classes': ('collapse',),
-            'fields': ('assigned_controls',),
-        }),
-        ('Configurazione Tipi Derivati (solo se non base)', {
-            'classes': ('collapse',),
-            'fields': ('component_element_types',),
-        }),
-    )
+    def get_fieldsets(self, request, obj=None):
+        """
+        Mostra dinamicamente i fieldset corretti in base al tipo di ElementType.
+        """
+        base_info = (None, {'fields': ('nome', 'descrizione', 'campagna', 'is_base', 'is_enabled')})
+        
+        if obj and obj.is_base:
+            # Se è un tipo BASE, mostra la configurazione manuale di minacce e controlli
+            return (
+                base_info,
+                ('Configurazione Minacce (righe)', {'classes': ('collapse',), 'fields': ('minacce',)}),
+                ('Configurazione Controlli (colonne)', {'classes': ('collapse',), 'fields': ('assigned_controls',)}),
+            )
+        elif obj and not obj.is_base:
+            # Se è un tipo DERIVATO, mostra solo la configurazione dei componenti
+            return (
+                base_info,
+                ('Configurazione Tipi Derivati', {'classes': ('collapse',), 'fields': ('component_element_types',)}),
+            )
+        else:
+            # In fase di creazione (obj is None), mostra tutto per permettere la scelta
+            return (
+                base_info,
+                ('Configurazione per Tipi Base (lasciare vuota la sezione "derivati")', {
+                    'classes': ('collapse',),
+                    'fields': ('minacce', 'assigned_controls')
+                }),
+                ('Configurazione per Tipi Derivati (compilare per creare un tipo derivato)', {
+                    'classes': ('collapse',),
+                    'fields': ('component_element_types',)
+                }),
+            )
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         formfield = super().formfield_for_manytomany(db_field, request, **kwargs)
-        # Per i campi in `filter_horizontal` (come 'minacce' e 'component_element_types'),
-        # Django utilizza già il widget `FilteredSelectMultiple`.
-        # L'applicazione esplicita di `RelatedFieldWidgetWrapper` qui può causare
-        # la comparsa indesiderata delle icone '+' e lente d'ingrandimento.
-        # Rimuovendo questa logica, ci affidiamo al comportamento di default di `filter_horizontal`.
+        # Per il campo 'minacce', vogliamo nascondere il link "+" per aggiungere nuove minacce
+        # direttamente da questa schermata, per mantenere l'interfaccia pulita.
+        if db_field.name == "minacce":
+            # Il widget è avvolto in un RelatedFieldWidgetWrapper che aggiunge i link "+", "matita", ecc.
+            # Disabilitiamo la possibilità di aggiungere nuovi record correlati.
+            if isinstance(formfield.widget, admin.widgets.RelatedFieldWidgetWrapper):
+                formfield.widget.can_add_related = False
         return formfield
 
     def save_model(self, request, obj, form, change):
@@ -67,22 +86,8 @@ class ElementTypeAdmin(CustomDeleteActionMixin, MasterAdminMixin, admin.ModelAdm
         return qs
 
     def dimensione_matrice(self, obj):
-        if obj.is_base:
-            num_minacce = obj.minacce.count()
-            num_controlli = obj.controls_assigned_to_elementtype.count()
-            if num_minacce == 0 and num_controlli == 0:
-                return "N/D"
-            return f"{num_minacce} x {num_controlli}"
-        else:
-            components = obj.component_element_types.all()
-            if not components:
-                return "N/D (derivato)"
-            aggregated_minacce_ids = set()
-            aggregated_controlli_ids = set()
-            for component in components:
-                aggregated_minacce_ids.update(m.id for m in component.minacce.all())
-                aggregated_controlli_ids.update(c.id for c in component.controls_assigned_to_elementtype.all())
-            return f"{len(aggregated_minacce_ids)} x {len(aggregated_controlli_ids)} (A)"
+        # Chiama il metodo del modello che ora contiene la logica corretta (anche ricorsiva)
+        return obj.get_dimensione_matrice_display()
     dimensione_matrice.short_description = 'Dim. Matrice'
 
     def get_form(self, request, obj=None, **kwargs):
@@ -121,7 +126,7 @@ class ElementTypeAdmin(CustomDeleteActionMixin, MasterAdminMixin, admin.ModelAdm
                             campagna_id = request.GET.get('campagna__id__exact')
                             queryset = model.objects.filter(campagna_id=campagna_id) if campagna_id else model.objects.filter(campagna__isnull=True)
                         self.fields[field_name].queryset = queryset
-                        if field_name == 'component_element_types':
+                        if field_name in ['component_element_types', 'minacce']:
                             self.fields[field_name].label = "" # Rimuove l'etichetta del campo
         return ElementTypeAdminForm
 
@@ -175,28 +180,23 @@ class ElementTypeAdmin(CustomDeleteActionMixin, MasterAdminMixin, admin.ModelAdm
                     context['matrix_incomplete_warning_message'] = "Attenzione: alcune minacce non hanno valori di controllo (diversi da zero) associati. L'Element Type non potrà essere abilitato finché la matrice non sarà completa."
         if obj and not obj.is_base:
             components = obj.component_element_types.all()
-            if components.exists():
-                aggregated_minacce_ids = set()
-                aggregated_controlli_ids = set()
-                all_child_values = {}
-                for component in components:
-                    aggregated_minacce_ids.update(component.minacce.values_list('id', flat=True))
-                    aggregated_controlli_ids.update(Controllo.objects.filter(elementtype=component).values_list('id', flat=True))
-                    for v in ValoreElementType.objects.filter(elementtype=component):
-                        all_child_values[(v.minaccia_id, v.controllo_id)] = v.valore
-                if aggregated_minacce_ids and aggregated_controlli_ids:
-                    aggregated_minacce = Minaccia.objects.filter(id__in=aggregated_minacce_ids).order_by('descrizione')
-                    aggregated_controlli = Controllo.objects.filter(id__in=aggregated_controlli_ids).order_by('nome')
-                    aggregated_matrix_data = []
-                    for minaccia in aggregated_minacce:
-                        row = {'minaccia': minaccia, 'cells': []}
-                        for controllo in aggregated_controlli:
-                            value = all_child_values.get((minaccia.id, controllo.id))
-                            formatted_value = str(value).replace('.', ',') if value is not None else ''
-                            row['cells'].append({'controllo': controllo, 'value': formatted_value})
-                        aggregated_matrix_data.append(row)
-                    context['aggregated_matrix_data'] = aggregated_matrix_data
-                    context['aggregated_matrix_controlli'] = aggregated_controlli
+            # Usa i nuovi metodi ricorsivi per ottenere minacce e controlli
+            aggregated_minacce = obj.get_all_minacce().order_by('descrizione')
+            aggregated_controlli = obj.get_all_controlli().order_by('nome')
+
+            if aggregated_minacce.exists() and aggregated_controlli.exists():
+                aggregated_matrix_data = []
+                for minaccia in aggregated_minacce:
+                    row = {'minaccia': minaccia, 'cells': []}
+                    for controllo in aggregated_controlli:
+                        # Il valore viene letto direttamente dalla matrice aggregata del padre
+                        valore_obj = obj.valori_matrice.filter(minaccia=minaccia, controllo=controllo).first()
+                        value = valore_obj.valore if valore_obj else None
+                        formatted_value = str(value).replace('.', ',') if value is not None else ''
+                        row['cells'].append({'controllo': controllo, 'value': formatted_value})
+                    aggregated_matrix_data.append(row)
+                context['aggregated_matrix_data'] = aggregated_matrix_data
+                context['aggregated_matrix_controlli'] = aggregated_controlli
         return super().render_change_form(request, context, add, change, form_url, obj)
 
     def response_change(self, request, obj):

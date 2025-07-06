@@ -1,5 +1,6 @@
 from django.contrib import admin
 from mptt.admin import DraggableMPTTAdmin
+from import_export.admin import ImportExportModelAdmin
 from .models import Asset, NodoStruttura, StrutturaTemplate, NodoTemplate
 from django.urls import reverse
 from django.utils.html import format_html
@@ -7,14 +8,16 @@ from django.utils.http import urlencode
 from core.admin_mixins import CustomDeleteActionMixin, MasterAdminMixin
 from core.admin_filters import MasterCampaignFilter
 from simple_history.admin import SimpleHistoryAdmin
+from .resources import AssetResource, StrutturaTemplateResource, NodoTemplateResource, NodoStrutturaResource
 
 
 @admin.register(StrutturaTemplate)
-class StrutturaTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, admin.ModelAdmin):
+class StrutturaTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('nome', 'dimensione_matrice', 'campagna', 'delete_button')
     list_filter = (MasterCampaignFilter, 'campagna')
     search_fields = ('nome', 'descrizione')
     readonly_fields = ('campagna', 'gestisci_nodi')
+    resource_class = StrutturaTemplateResource
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -45,11 +48,12 @@ class StrutturaTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHi
 
 
 @admin.register(NodoTemplate)
-class NodoTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, DraggableMPTTAdmin):
+class NodoTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, ImportExportModelAdmin, DraggableMPTTAdmin):
     list_display = ('tree_actions', 'indented_title', 'dimensione_matrice', 'template', 'element_type', 'campagna', 'delete_button')
     list_display_links = ('indented_title',)
     list_filter = (MasterCampaignFilter, 'template')
     readonly_fields = ('campagna',)
+    resource_class = NodoTemplateResource
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -66,12 +70,13 @@ class NodoTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistory
 
 
 @admin.register(Asset) # Aggiunto MasterAdminMixin per coerenza
-class AssetAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, admin.ModelAdmin):
+class AssetAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('nome', 'dimensione_matrice', 'status', 'template_da_applicare', 'campagna', 'cmdb', 'delete_button')
     list_filter = (MasterCampaignFilter, 'status', 'campagna', 'legal_entity')  # Add 'legal_entity' to the filter
     search_fields = ('nome', 'descrizione', 'cmdb')  # Include 'cmdb' in search fields
     readonly_fields = ('campagna', 'gestisci_nodi_struttura')  # Maintain readonly fields
     raw_id_fields = ('utente_responsabile', 'responsabile_applicativo')
+    resource_class = AssetResource
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -118,12 +123,13 @@ class AssetAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, 
 
 
 @admin.register(NodoStruttura)
-class NodoStrutturaAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, DraggableMPTTAdmin):
+class NodoStrutturaAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, ImportExportModelAdmin, DraggableMPTTAdmin):
     list_display = ('tree_actions', 'indented_title', 'dimensione_matrice', 'asset', 'element_type', 'campagna', 'delete_button')
     list_display_links = ('indented_title',)
     list_filter = (MasterCampaignFilter, 'asset')
     raw_id_fields = ('asset', 'element_type', 'parent')
     readonly_fields = ('campagna',)
+    resource_class = NodoStrutturaResource
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 from campagne.models import Campagna
 from minacce.models import Minaccia
+from controlli.models import Controllo
 from .managers import ElementTypeManager # Importa il manager personalizzato
 
 class ElementType(models.Model):
@@ -98,19 +99,60 @@ class ElementType(models.Model):
         con prefetch_related.
         """
         if self.is_base:
+            # Per i tipi base, i conteggi sono diretti.
             num_minacce = self.minacce.count()
             num_controlli = self.controls_assigned_to_elementtype.count()
             return f"{num_minacce} x {num_controlli}" if num_minacce or num_controlli else "N/D"
         else:
-            # Per i tipi derivati, aggrega le minacce e i controlli dai componenti.
-            # Questo si basa sui dati pre-caricati per l'efficienza.
-            components = self.component_element_types.all()
-            if not components:
+            # Per i tipi derivati, usa i metodi ricorsivi per ottenere i conteggi corretti.
+            if not self.component_element_types.exists():
                 return "N/D (derivato)"
             
-            aggregated_minacce_ids = set().union(*(c.minacce.values_list('id', flat=True) for c in components))
-            aggregated_controlli_ids = set().union(*(c.controls_assigned_to_elementtype.values_list('id', flat=True) for c in components))
-            return f"{len(aggregated_minacce_ids)} x {len(aggregated_controlli_ids)} (A)"
+            num_minacce = self.get_all_minacce().count()
+            num_controlli = self.get_all_controlli().count()
+            return f"{num_minacce} x {num_controlli} (A)"
+
+    def get_all_controlli(self):
+        """
+        Restituisce un queryset di tutti i controlli associati, gestendo la derivazione ricorsiva.
+        """
+        if self.is_base:
+            return self.controls_assigned_to_elementtype.all()
+        
+        all_control_ids = set()
+        for component in self.component_element_types.all():
+            all_control_ids.update(component.get_all_controlli().values_list('id', flat=True))
+            
+        return Controllo.objects.filter(id__in=all_control_ids)
+
+    def get_all_minacce(self):
+        """
+        Restituisce un queryset di tutte le minacce applicabili, gestendo la derivazione ricorsiva.
+        """
+        if self.is_base:
+            return self.minacce.all()
+        
+        all_minaccia_ids = set()
+        for component in self.component_element_types.all():
+            all_minaccia_ids.update(component.get_all_minacce().values_list('id', flat=True))
+            
+        return Minaccia.objects.filter(id__in=all_minaccia_ids)
+
+    def get_valore_matrice(self, minaccia, controllo):
+        """
+        Restituisce il valore di una cella della matrice, gestendo la ricorsione per i tipi derivati.
+        """
+        if self.is_base:
+            valore_obj = self.valori_matrice.filter(minaccia=minaccia, controllo=controllo).first()
+            return valore_obj.valore if valore_obj else 0.0
+        
+        # Per i tipi derivati, calcola il MAX dei valori dei componenti.
+        max_valore = 0.0
+        for component in self.component_element_types.all():
+            valore_componente = component.get_valore_matrice(minaccia, controllo)
+            if valore_componente > max_valore:
+                max_valore = valore_componente
+        return max_valore
 
     class Meta:
         verbose_name = "Element Type"
