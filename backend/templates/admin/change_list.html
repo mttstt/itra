@@ -1,0 +1,14 @@
+{% extends "admin/change_list.html" %}
+{% load i18n static admin_urls campaign_admin_tags %}
+
+{# Sovrascrive il blocco che contiene il pulsante "Aggiungi" per renderlo "campaign-aware" #}
+{% block object-tools-items %}
+  {% if has_add_permission %}
+    <li>
+      {% url cl.opts|admin_urlname:'add' as add_url %}
+      <a href="{% campaign_aware_url add_url cl.opts.model_name current_campagna %}" class="addlink">
+        {% blocktrans with cl.opts.verbose_name as name %}Aggiungi {{ name }}{% endblocktrans %}
+      </a>
+    </li>
+  {% endif %}
+{% endblock %}

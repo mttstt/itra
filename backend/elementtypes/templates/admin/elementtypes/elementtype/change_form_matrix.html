@@ -1,0 +1,60 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block after_field_sets %}
+{{ block.super }}
+
+{% if original %}
+<fieldset class="module aligned">
+    <h2>{% trans "Matrice di Rischio" %} ({{ matrix_rows|length }} Minacce x {{ matrix_controlli_header|length }} Controlli)</h2>
+    
+    {% if not is_base_element_type %}
+    <div class="help">
+        {% trans "Seleziona le caselle per indicare quali controlli mitigano quali minacce per questo Element Type. Le modifiche verranno salvate insieme al resto del form." %}
+    </div>
+    {% else %}
+    <div class="help">
+        {% trans "Questa è una matrice di un <strong>Element Type Base</strong>. I valori sono determinati automaticamente dai controlli assegnati a questo Element Type e non sono modificabili direttamente qui. Per modificare la matrice, assegna o rimuovi i controlli dall'anagrafica dei Controlli." %}
+    </div>
+    {% endif %}
+
+    {% if matrix_rows and matrix_controlli_header %}
+    <div class="matrix-container" style="overflow-x: auto; max-height: 600px; overflow-y: auto; border: 1px solid #ccc;">
+        <table id="risk-matrix">
+            <thead style="position: sticky; top: 0; background-color: #f8f8f8; z-index: 1;">
+                <tr>
+                    <th style="position: sticky; left: 0; background-color: #f8f8f8; z-index: 2; min-width: 250px;">{% trans "Minaccia / Controllo" %}</th>
+                    {% for controllo in matrix_controlli_header %}
+                        <th title="{{ controllo.nome }} - {{ controllo.descrizione|truncatechars:100 }}">
+                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; padding: 5px 2px; height: 150px; display: flex; align-items: center; justify-content: center;">
+                                {{ controllo.nome }}
+                            </div>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in matrix_rows %}
+                <tr>
+                    <th style="position: sticky; left: 0; background-color: #f9f9f9; z-index: 1; text-align: left; padding: 4px 8px;">{{ row.minaccia.descrizione }}</th>
+                    {% for cell in row.controlli %}
+                        <td style="text-align: center; vertical-align: middle;">
+                            <input type="checkbox"
+                                   name="matrix-{{ row.minaccia.id }}-{{ cell.controllo.id }}"
+                                   value="{{ cell.controllo.peso_controllo }}"
+                                   {% if cell.checked %}checked{% endif %}
+                                   {% if is_base_element_type %}disabled{% endif %}
+                                   title="Controllo: {{ cell.controllo.nome }} | Valore: {{ cell.valore|default:'N/A' }}">
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>{% trans "Nessuna minaccia o controllo associato a questo Element Type. La matrice non può essere visualizzata." %}</p>
+    {% endif %}
+</fieldset>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,8 @@
+{
+    "geminicodeassist.chat.defaultCodeBlockDisplay": "Collapsed",
+    "geminicodeassist.enableTelemetry": false,
+    "geminicodeassist.recitation.maxCitedLength": 0,
+    "geminicodeassist.updateChannel": "Default",
+    "geminicodeassist.log.level": "off",
+    "geminicodeassist.trace.level": "off"
+}

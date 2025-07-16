@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.6; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 900px; margin: 20px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1, h2, h3, h4, h5, h6 { color: #222; margin-top: 1.5em; margin-bottom: 0.5em; }
+        h1 { font-size: 2.5em; }
+        h2 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.5em; }
+        pre { background-color: #eee; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 0.9em; line-height: 1.4; }
+        code { font-family: 'Courier New', monospace; background-color: #e9e9e9; padding: 2px 4px; border-radius: 3px; }
+        pre code { background-color: transparent; padding: 0; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .refresh-link { text-align: right; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="refresh-link"><a href="{% url 'homepage' %}">Ricarica contenuto README.md</a></div>
+        {{ readme_html|safe }}
+    </div>
+</body>
+</html>

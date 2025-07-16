@@ -1,0 +1,200 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block after_field_sets %}
+{{ block.super }}
+
+<style>
+    #risk-matrix, #aggregated-risk-matrix {
+        border-collapse: collapse;
+    }
+    #risk-matrix th, #risk-matrix td,
+    #aggregated-risk-matrix th, #aggregated-risk-matrix td {
+        border: 1px solid #e0e0e0;
+        vertical-align: middle;
+        text-align: center;
+        padding: 0;
+    }
+    #risk-matrix tbody th, #aggregated-risk-matrix tbody th {
+        position: sticky;
+        left: 0;
+        background-color: #f9f9f9;
+        z-index: 1;
+        text-align: left;
+        padding: 4px 8px;
+    }
+    #risk-matrix input[type="text"] {
+        border: none;
+        background-color: transparent;
+        width: 3.5em;
+        padding: 4px 2px;
+        box-sizing: border-box;
+        text-align: center;
+        font-family: monospace, sans-serif;
+        font-size: 12px;
+    }
+    #risk-matrix input[type="text"]:focus {
+        outline: 2px solid #79aec8;
+        background-color: #f0f8ff;
+    }
+    #risk-matrix input.invalid-matrix-value {
+        border: 1px solid #ba2121;
+        background-color: #fff0f0;
+    }
+</style>
+
+{% if original and original.is_base %}
+    {% if matrix_render_problem %}
+        <fieldset class="module aligned">
+            <h2>{% trans "Matrice di Rischio" %}</h2>
+            <div class="help" style="padding-left: 10px; color: #555;">
+                <p><strong>{% trans "La matrice non può essere visualizzata." %}</strong></p>
+                <p>{{ matrix_render_problem_message }}</p>
+            </div>
+        </fieldset>
+    {% else %}
+        <fieldset class="module aligned">
+            <h2>{% trans "Matrice di Rischio" %}</h2>
+
+            {% if matrix_incomplete_warning %}
+                <div class="help" style="padding-left: 10px; color: #f0ad4e;">
+                    <p><strong>{% trans "Matrice Incompleta:" %}</strong> {{ matrix_incomplete_warning_message }}</p>
+                </div>
+            {% endif %}
+
+            <div class="help">
+                {% trans "Inserire i valori della matrice di rischio (da 0.01 a 1, es. 0.5). Lasciare vuoto o inserire 0 per rimuovere un valore. Le modifiche verranno salvate insieme al resto del form." %}
+            </div>
+
+            <div class="matrix-container" style="overflow-x: auto; max-height: 600px; overflow-y: auto;">
+                <table id="risk-matrix">
+                    <thead style="position: sticky; top: 0; background-color: #f8f8f8; z-index: 1;">
+                        <tr>
+                            <th style="position: sticky; left: 0; background-color: #f8f8f8; z-index: 2; min-width: 250px;">{% trans "Minaccia / Controllo" %}</th>
+                            {% for controllo in matrix_controlli %}
+                                <th title="{{ controllo.nome }} - {{ controllo.descrizione|truncatechars:100 }}">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; padding: 5px 2px; height: 150px; display: inline-flex; align-items: center; justify-content: center;">
+                                        <a href="{% url 'admin:controlli_controllo_change' controllo.id %}?_to_field=id&_popup=1" class="related-widget-wrapper-link" title="Modifica Controllo">{{ controllo.nome }}</a>
+                                    </div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in matrix_data %}
+                        <tr>
+                            <th>
+                                <a href="{% url 'admin:minacce_minaccia_change' row.minaccia.id %}?_to_field=id&_popup=1" class="related-widget-wrapper-link" title="Modifica Minaccia">{{ row.minaccia.descrizione }}</a>
+                            </th>
+                            {% for cell in row.cells %}
+                                <td>
+                                    <input type="text"
+                                           name="matrix-{{ row.minaccia.id }}-{{ cell.controllo.id }}"
+                                           value="{{ cell.value|default_if_none:'' }}"
+                                           pattern="^$|^(0[.,](0[1-9]|[1-9]\d?)|1([.,]00?)?)$"
+                                           step="0.01"
+                                           title="Controllo: {{ cell.controllo.nome }} | Minaccia: {{ row.minaccia.descrizione }}">
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+    {% endif %}
+{% endif %}
+
+{% if original and not original.is_base %}
+<fieldset class="module aligned">
+    <h2>{% trans "Matrice di Rischio Aggregata (Read-Only)" %}</h2>
+
+    {% if aggregated_matrix_data and aggregated_matrix_controlli %}
+    <div class="help">
+        {% trans "Questa matrice è calcolata automaticamente aggregando le matrici dei componenti definiti nella sezione 'Configurazione Tipi Derivati'. Non è modificabile direttamente." %}
+    </div>
+
+    <div class="matrix-container" style="overflow-x: auto; max-height: 600px; overflow-y: auto;">
+        <table id="aggregated-risk-matrix">
+            <thead style="position: sticky; top: 0; background-color: #f8f8f8; z-index: 1;">
+                <tr>
+                    <th style="position: sticky; left: 0; background-color: #f8f8f8; z-index: 2; min-width: 250px;">{% trans "Minaccia / Controllo" %}</th>
+                    {% for controllo in aggregated_matrix_controlli %}
+                        <th title="{{ controllo.nome }} - {{ controllo.descrizione|truncatechars:100 }}">
+                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; padding: 5px 2px; height: 150px; display: inline-flex; align-items: center; justify-content: center;">
+                                <a href="{% url 'admin:controlli_controllo_change' controllo.id %}?_to_field=id&_popup=1" class="related-widget-wrapper-link" title="Modifica Controllo">{{ controllo.nome }}</a>
+                            </div>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in aggregated_matrix_data %}
+                <tr>
+                    <th>
+                        <a href="{% url 'admin:minacce_minaccia_change' row.minaccia.id %}?_to_field=id&_popup=1" class="related-widget-wrapper-link" title="Modifica Minaccia">{{ row.minaccia.descrizione }}</a>
+                    </th>
+                    {% for cell in row.cells %}
+                        <td style="text-align: center; vertical-align: middle; font-family: monospace, sans-serif; font-size: 12px; padding: 4px 2px; min-width: 4em; background-color: {% if cell.value and cell.value != '' %}#f5f5f5{% else %}transparent{% endif %};">
+                            {{ cell.value|default:"-" }}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="help" style="padding-left: 10px; color: #555;">
+            <p><strong>{% trans "La matrice aggregata non può essere visualizzata." %}</strong></p>
+            <p>{% trans "Per costruire la matrice, è necessario che questo ElementType derivato abbia almeno un componente con una matrice di rischio definita." %}</p>
+        </div>
+    {% endif %}
+</fieldset>
+{% endif %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script>
+    (function($) {
+        $(document).ready(function() {
+            const matrixInputs = $('#risk-matrix input[type="text"]');
+            
+            matrixInputs.each(function() {
+                const input = $(this);
+                const validateInput = function() {
+                    const value = input.val().trim();
+                    const numericValue = parseFloat(value.replace(',', '.'));
+
+                    const pattern = new RegExp(input.attr('pattern'));
+                    if (value && !pattern.test(value)) {
+                        input.addClass('invalid-matrix-value');
+                    } else {
+                        input.removeClass('invalid-matrix-value');
+                    }
+                };
+                input.on('input', validateInput);
+                validateInput();
+            });
+
+            matrixInputs.on('keydown', function(e) {
+                if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                    (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                    (e.keyCode >= 35 && e.keyCode <= 39)) {
+                         return;
+                }
+                if (e.keyCode === 188) {
+                    if ($(this).val().indexOf(',') > -1) {
+                        e.preventDefault();
+                    }
+                    return;
+                }
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    })(django.jQuery);
+</script>
+{% endblock %}
+{% endblock %}
