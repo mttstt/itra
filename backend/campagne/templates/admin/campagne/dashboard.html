@@ -14,8 +14,6 @@
             <li><a href="{% url 'admin:scenari_scenario_changelist' %}?campagna__id__exact={{ campagna.id }}">Visualizza Scenari</a> ({{ campagna.scenari_count }})</li>
             <li><a href="{% url 'admin:elementtypes_elementtype_changelist' %}?campagna__id__exact={{ campagna.id }}">Visualizza Element Types</a> ({{ campagna.elementtypes_count }})</li>
             <li><a href="{% url 'admin:assets_asset_changelist' %}?campagna__id__exact={{ campagna.id }}">Visualizza Assets</a> ({{ campagna.assets_count }})</li>
-            <li><a href="{% url 'admin:assets_strutturatemplate_changelist' %}?campagna__id__exact={{ campagna.id }}">Visualizza Templates di Struttura</a> ({{ campagna.strutture_template_count }})</li>
-            <li><a href="{% url 'admin:assets_nodotemplate_changelist' %}?campagna__id__exact={{ campagna.id }}">Visualizza Nodi di Template</a> ({{ campagna.noditemplate_count }})</li>
             <li><a href="{% url 'admin:assets_nodostruttura_changelist' %}?campagna__id__exact={{ campagna.id }}">Visualizza Nodi di Struttura</a> ({{ campagna.nodistruttura_count }})</li>
        </ul>
     </div>

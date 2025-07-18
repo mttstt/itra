@@ -2,16 +2,18 @@ from django.contrib import admin
 from mptt.admin import DraggableMPTTAdmin
 from import_export.admin import ImportExportModelAdmin
 from .models import Asset, NodoStruttura, StrutturaTemplate, NodoTemplate
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.http import urlencode
+from urllib.parse import urlparse, parse_qs
 from core.admin_mixins import CustomDeleteActionMixin, MasterAdminMixin
 from core.admin_filters import MasterCampaignFilter
 from simple_history.admin import SimpleHistoryAdmin
 from .resources import AssetResource, StrutturaTemplateResource, NodoTemplateResource, NodoStrutturaResource
 
 
-@admin.register(StrutturaTemplate)
+# @admin.register(StrutturaTemplate)
 class StrutturaTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('nome', 'dimensione_matrice', 'campagna', 'delete_button')
     list_filter = (MasterCampaignFilter, 'campagna')
@@ -47,7 +49,7 @@ class StrutturaTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHi
     gestisci_nodi.short_description = 'Struttura ad Albero'
 
 
-@admin.register(NodoTemplate)
+# @admin.register(NodoTemplate)
 class NodoTemplateAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistoryAdmin, ImportExportModelAdmin, DraggableMPTTAdmin):
     list_display = ('tree_actions', 'indented_title', 'dimensione_matrice', 'template', 'element_type', 'campagna', 'delete_button')
     list_display_links = ('indented_title',)
@@ -130,6 +132,56 @@ class NodoStrutturaAdmin(CustomDeleteActionMixin, MasterAdminMixin, SimpleHistor
     raw_id_fields = ('asset', 'element_type', 'parent')
     readonly_fields = ('campagna',)
     resource_class = NodoStrutturaResource
+
+    def add_view(self, request, form_url='', extra_context=None):
+        """
+        Sovrascrive la add_view per portare il contesto dell'asset dal referer (es. changelist filtrata).
+        Se l'utente arriva alla pagina di aggiunta da una lista di nodi filtrata per asset,
+        l'ID dell'asset viene aggiunto all'URL per pre-compilare il form.
+        """
+        if 'asset__id__exact' not in request.GET:
+            referer = request.META.get('HTTP_REFERER')
+            if referer:
+                try:
+                    parsed_url = urlparse(referer)
+                    query_params = parse_qs(parsed_url.query)
+                    asset_id = query_params.get('asset__id__exact')
+                    if asset_id:
+                        new_query_params = request.GET.copy()
+                        new_query_params['asset__id__exact'] = asset_id[0]
+                        return HttpResponseRedirect(f"{request.path}?{new_query_params.urlencode()}")
+                except Exception:
+                    pass # Ignora errori di parsing e procedi
+        return super().add_view(request, form_url, extra_context)
+
+    def get_form(self, request, obj=None, **kwargs):
+        """
+        Pre-compila e disabilita il campo 'asset' se fornito nel contesto dell'URL.
+        """
+        form = super().get_form(request, obj, **kwargs)
+        asset_id = request.GET.get('asset__id__exact')
+        
+        # Crea un nuovo form type ereditando dal form base.
+        class NodoStrutturaForm(form):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                # Nella vista di aggiunta, se l'asset è nel contesto, pre-compila e disabilita il campo.
+                if not self.instance.pk and asset_id and 'asset' in self.fields:
+                    self.fields['asset'].initial = asset_id
+                    self.fields['asset'].widget.attrs['readonly'] = True  # Imposta l'attributo readonly
+        return NodoStrutturaForm
+        return form
+
+    def save_model(self, request, obj, form, change):
+        """
+        Assicura che l'asset venga salvato correttamente, anche se il campo è disabilitato nel form.
+        """
+        # Se si sta creando un nuovo oggetto e l'asset non è stato impostato
+        if not change and not obj.asset_id:
+            asset_id = request.GET.get('asset__id__exact')
+            if asset_id:
+                obj.asset = Asset.objects.get(pk=asset_id)
+        super().save_model(request, obj, form, change)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
