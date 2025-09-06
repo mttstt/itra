@@ -1,0 +1,212 @@
+{
+    "matrice": {
+        "M.13 - Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno": {
+            "32 - L'accesso al sistema richiede la definizione di password \"strong\" e meccanismi di protezione, che prevedono:\n1) Numero di caratteri minimo\n2) Utilizzo di caratteri alfa numerici\n3) Cambio periodico della password\n4) Memoria delle ultime password utilizzate\n5) Blocco utente in caso di reiterata password errata\n6) La sessione applicativa si blocca automaticamente dopo X minuti di inattivit\u00e0": "X",
+            "44 - Qualora il sistema tratti dati sensibili, sono poste in essere misure di anonimizzazione dei dati negli ambienti inferiori alla produzione quali: data masking, pseudonymization or anonymization.": "X",
+            "45 - Quando i dati vengono archiviati, \u00e8 necessario prestare attenzione per garantire che le informazioni sensibili siano protette mediante misure come la crittografia, il controllo degli accessi e la protezione fisica dei supporti di archiviazione che contengono il backup (quest'ultimo caso da valutarsi nell'ambito del Data Center).": "X",
+            "49 - I log prodotti dal sistema non possono essere cancellati o modificati per un periodo di retention stabilito": "X",
+            "57 - Il sistema logga le attivit\u00e0 di sistema ritenute maggiormente critiche, mantenendo le seguenti informazioni:\na) user IDs;\nb) system activities;\nc) dates, times and details of relevant events (e.g. log-on and log-off);\nd) device identity, system identifier and location;\ne) network addresses and protocols.": "X",
+            "64 - La Banca ha definito un piano periodico di patching per i database, al fine di assicurare che le macchine e i sistemi siano sempre aggiornate all'ultima release": "X",
+            "69 - Le nuove release sono testate prima del deploy in produzione": "",
+            "85 - La Banca monitora nel continuo l'utilizzo della capacity presente per garantire e, se necessario, migliorare la disponibilit\u00e0 ed efficienza dei sistemi": "",
+            "88 - La Banca effettua test di stress dei sistemi e dei servizi per confermare che sia disponibile una capacit\u00e0 sufficiente per soddisfare i requisiti di prestazioni di picco.": "",
+            "109 - Esistono meccanismi di monitoraggio del buon esito dei job": "",
+            "120 - Il Sistema implementa meccanismi di segregazione dei ruoli, tramite profili abilitativi (modello SoD).": "",
+            "158 - Sono presenti ambienti separati di DEV/TST/PRD": "",
+            "167 - I database sono soggetti a attivit\u00e0 di hardening sia al momento della loro prima implementazione sia in modo continuativo nel tempo.": "X",
+            "185 - E' condotto periodicamente/sistematicamente una analisi di costi/benefici per evitare l'obsolescenza dei Database in uso presso la Banca e mitigare il rischio": "X",
+            "198 - Il database \u00e8 mantenuto aggiornato ad una versione pienamente supportata dal fornitore della licenza (Oracle e MSSQL).\n\nModalit\u00e0 di compilazione:\nEfficace: risk rating 0\nPrevalentemente efficace: risk rating 0,01/0,02/0,05\nPrevalentemente inefficace: risk rating 0,01/0,3/0,5\nNon efficace: risk rating 0\n\nIL risk rating viene calcolato utilizzando le medesime modalit\u00e0 definite per il KRI DB.OB": "X",
+            "223 - Durante l'anno in corso ed in relazione all'asset ICT considerato, la Banca ha testato le procedure di backup e di ripristino dei dati.": "X",
+            "224 - E' disponibile una segregazione logica dei Database sui quali sono presenti i Backup": "X"
+        },
+        "M.16 - Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT": {
+            "32 - L'accesso al sistema richiede la definizione di password \"strong\" e meccanismi di protezione, che prevedono:\n1) Numero di caratteri minimo\n2) Utilizzo di caratteri alfa numerici\n3) Cambio periodico della password\n4) Memoria delle ultime password utilizzate\n5) Blocco utente in caso di reiterata password errata\n6) La sessione applicativa si blocca automaticamente dopo X minuti di inattivit\u00e0": "",
+            "44 - Qualora il sistema tratti dati sensibili, sono poste in essere misure di anonimizzazione dei dati negli ambienti inferiori alla produzione quali: data masking, pseudonymization or anonymization.": "",
+            "45 - Quando i dati vengono archiviati, \u00e8 necessario prestare attenzione per garantire che le informazioni sensibili siano protette mediante misure come la crittografia, il controllo degli accessi e la protezione fisica dei supporti di archiviazione che contengono il backup (quest'ultimo caso da valutarsi nell'ambito del Data Center).": "X",
+            "49 - I log prodotti dal sistema non possono essere cancellati o modificati per un periodo di retention stabilito": "",
+            "57 - Il sistema logga le attivit\u00e0 di sistema ritenute maggiormente critiche, mantenendo le seguenti informazioni:\na) user IDs;\nb) system activities;\nc) dates, times and details of relevant events (e.g. log-on and log-off);\nd) device identity, system identifier and location;\ne) network addresses and protocols.": "X",
+            "64 - La Banca ha definito un piano periodico di patching per i database, al fine di assicurare che le macchine e i sistemi siano sempre aggiornate all'ultima release": "",
+            "69 - Le nuove release sono testate prima del deploy in produzione": "X",
+            "85 - La Banca monitora nel continuo l'utilizzo della capacity presente per garantire e, se necessario, migliorare la disponibilit\u00e0 ed efficienza dei sistemi": "X",
+            "88 - La Banca effettua test di stress dei sistemi e dei servizi per confermare che sia disponibile una capacit\u00e0 sufficiente per soddisfare i requisiti di prestazioni di picco.": "X",
+            "109 - Esistono meccanismi di monitoraggio del buon esito dei job": "X",
+            "120 - Il Sistema implementa meccanismi di segregazione dei ruoli, tramite profili abilitativi (modello SoD).": "X",
+            "158 - Sono presenti ambienti separati di DEV/TST/PRD": "X",
+            "167 - I database sono soggetti a attivit\u00e0 di hardening sia al momento della loro prima implementazione sia in modo continuativo nel tempo.": "X",
+            "185 - E' condotto periodicamente/sistematicamente una analisi di costi/benefici per evitare l'obsolescenza dei Database in uso presso la Banca e mitigare il rischio": "",
+            "198 - Il database \u00e8 mantenuto aggiornato ad una versione pienamente supportata dal fornitore della licenza (Oracle e MSSQL).\n\nModalit\u00e0 di compilazione:\nEfficace: risk rating 0\nPrevalentemente efficace: risk rating 0,01/0,02/0,05\nPrevalentemente inefficace: risk rating 0,01/0,3/0,5\nNon efficace: risk rating 0\n\nIL risk rating viene calcolato utilizzando le medesime modalit\u00e0 definite per il KRI DB.OB": "",
+            "223 - Durante l'anno in corso ed in relazione all'asset ICT considerato, la Banca ha testato le procedure di backup e di ripristino dei dati.": "X",
+            "224 - E' disponibile una segregazione logica dei Database sui quali sono presenti i Backup": ""
+        }
+    },
+    "spiegazioni": [
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 45,
+            "Controllo": "Quando i dati vengono archiviati, \u00e8 necessario prestare attenzione per garantire che le informazioni sensibili siano protette mediante misure come la crittografia, il controllo degli accessi e la protezione fisica dei supporti di archiviazione che contengono il backup (quest'ultimo caso da valutarsi nell'ambito del Data Center).",
+            "Categoria": "Preventive",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.56"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 167,
+            "Controllo": "I database sono soggetti a attivit\u00e0 di hardening sia al momento della loro prima implementazione sia in modo continuativo nel tempo.",
+            "Categoria": "Preventive",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.50"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 57,
+            "Controllo": "Il sistema logga le attivit\u00e0 di sistema ritenute maggiormente critiche, mantenendo le seguenti informazioni:\na) user IDs;\nb) system activities;\nc) dates, times and details of relevant events (e.g. log-on and log-off);\nd) device identity, system identifier and location;\ne) network addresses and protocols.",
+            "Categoria": "Detective",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.50"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 223,
+            "Controllo": "Durante l'anno in corso ed in relazione all'asset ICT considerato, la Banca ha testato le procedure di backup e di ripristino dei dati.",
+            "Categoria": "Detective",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.49"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 45,
+            "Controllo": "Quando i dati vengono archiviati, \u00e8 necessario prestare attenzione per garantire che le informazioni sensibili siano protette mediante misure come la crittografia, il controllo degli accessi e la protezione fisica dei supporti di archiviazione che contengono il backup (quest'ultimo caso da valutarsi nell'ambito del Data Center).",
+            "Categoria": "Preventive",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.50"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 167,
+            "Controllo": "I database sono soggetti a attivit\u00e0 di hardening sia al momento della loro prima implementazione sia in modo continuativo nel tempo.",
+            "Categoria": "Preventive",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.49"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 223,
+            "Controllo": "Durante l'anno in corso ed in relazione all'asset ICT considerato, la Banca ha testato le procedure di backup e di ripristino dei dati.",
+            "Categoria": "Detective",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.52"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 57,
+            "Controllo": "Il sistema logga le attivit\u00e0 di sistema ritenute maggiormente critiche, mantenendo le seguenti informazioni:\na) user IDs;\nb) system activities;\nc) dates, times and details of relevant events (e.g. log-on and log-off);\nd) device identity, system identifier and location;\ne) network addresses and protocols.",
+            "Categoria": "Detective",
+            "Motivazione": "Similarit\u00e0 semantica SBERT: 0.44"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 32,
+            "Controllo": "L'accesso al sistema richiede la definizione di password \"strong\" e meccanismi di protezione, che prevedono:\n1) Numero di caratteri minimo\n2) Utilizzo di caratteri alfa numerici\n3) Cambio periodico della password\n4) Memoria delle ultime password utilizzate\n5) Blocco utente in caso di reiterata password errata\n6) La sessione applicativa si blocca automaticamente dopo X minuti di inattivit\u00e0",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.42)"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 44,
+            "Controllo": "Qualora il sistema tratti dati sensibili, sono poste in essere misure di anonimizzazione dei dati negli ambienti inferiori alla produzione quali: data masking, pseudonymization or anonymization.",
+            "Categoria": "Detective",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.49)"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 49,
+            "Controllo": "I log prodotti dal sistema non possono essere cancellati o modificati per un periodo di retention stabilito",
+            "Categoria": "Detective",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.43)"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 64,
+            "Controllo": "La Banca ha definito un piano periodico di patching per i database, al fine di assicurare che le macchine e i sistemi siano sempre aggiornate all'ultima release",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.30)"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 69,
+            "Controllo": "Le nuove release sono testate prima del deploy in produzione",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.39)"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 85,
+            "Controllo": "La Banca monitora nel continuo l'utilizzo della capacity presente per garantire e, se necessario, migliorare la disponibilit\u00e0 ed efficienza dei sistemi",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.48)"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 88,
+            "Controllo": "La Banca effettua test di stress dei sistemi e dei servizi per confermare che sia disponibile una capacit\u00e0 sufficiente per soddisfare i requisiti di prestazioni di picco.",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.36)"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 109,
+            "Controllo": "Esistono meccanismi di monitoraggio del buon esito dei job",
+            "Categoria": "Detective",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.35)"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 120,
+            "Controllo": "Il Sistema implementa meccanismi di segregazione dei ruoli, tramite profili abilitativi (modello SoD).",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.49)"
+        },
+        {
+            "ID Minaccia": "M.16",
+            "Minaccia": "Process failure per insufficiente definizione e implementazione di ruoli e responsabilit\u00e0 per le attivit\u00e0 ICT",
+            "ID Controllo": 158,
+            "Controllo": "Sono presenti ambienti separati di DEV/TST/PRD",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.38)"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 185,
+            "Controllo": "E' condotto periodicamente/sistematicamente una analisi di costi/benefici per evitare l'obsolescenza dei Database in uso presso la Banca e mitigare il rischio",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.47)"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 198,
+            "Controllo": "Il database \u00e8 mantenuto aggiornato ad una versione pienamente supportata dal fornitore della licenza (Oracle e MSSQL).\n\nModalit\u00e0 di compilazione:\nEfficace: risk rating 0\nPrevalentemente efficace: risk rating 0,01/0,02/0,05\nPrevalentemente inefficace: risk rating 0,01/0,3/0,5\nNon efficace: risk rating 0\n\nIL risk rating viene calcolato utilizzando le medesime modalit\u00e0 definite per il KRI DB.OB",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.39)"
+        },
+        {
+            "ID Minaccia": "M.13",
+            "Minaccia": "Furto/compromissione/accesso (logico) e modifica non autorizzata al patrimonio informativo dal personale interno",
+            "ID Controllo": 224,
+            "Controllo": "E' disponibile una segregazione logica dei Database sui quali sono presenti i Backup",
+            "Categoria": "Preventive",
+            "Motivazione": "Controllo non assegnato, associato semanticamente con SBERT (score: 0.49)"
+        }
+    ]
+}

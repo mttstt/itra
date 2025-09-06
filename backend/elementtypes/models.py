@@ -5,6 +5,7 @@ from campagne.models import Campagna
 from minacce.models import Minaccia
 from controlli.models import Controllo
 from .managers import ElementTypeManager # Importa il manager personalizzato
+import logging
 
 class ElementType(models.Model):
     nome = models.CharField("Nome", max_length=255)
@@ -62,32 +63,45 @@ class ElementType(models.Model):
                                   "per poter configurare la matrice di rischio."
                 })
 
-            # Vincolo 1: La matrice deve avere almeno una riga (minaccia associata).
+            # Vincolo 1: L'ElementType deve avere almeno una minaccia associata.
             if not self.minacce.exists():
                 raise ValidationError({
                     'is_enabled': "L'ElementType non può essere abilitato perché non ha minacce associate (righe della matrice)."
                 })
 
-            # Vincolo 2: La matrice deve avere almeno una colonna (controllo assegnato).
-            if not self.controls_assigned_to_elementtype.exists():
-                raise ValidationError({
-                    'is_enabled': "L'ElementType non può essere abilitato perché non ha controlli assegnati (colonne della matrice)."
-                })
+            # Vincolo 2 (Nuovo): Ogni minaccia associata deve avere almeno 4 controlli (2 preventive e 2 detective).
+            for minaccia in self.minacce.all():
+                preventive_controls_count = self.valori_matrice.filter(
+                    minaccia=minaccia,
+                    controllo__categoria_controllo='preventive'
+                ).count()
+                detective_controls_count = self.valori_matrice.filter(
+                    minaccia=minaccia,
+                    controllo__categoria_controllo='detective'
+                ).count()
 
-            # Vincolo 3: Non ci devono essere righe vuote (ogni minaccia deve avere almeno un controllo nella matrice).
-            assigned_threats = self.minacce.all()
-            threats_with_values_ids = set(self.valori_matrice.values_list('minaccia_id', flat=True))
+                if preventive_controls_count < 2 or detective_controls_count < 2:
+                    self.is_enabled = False
+                    break
             
-            threats_without_values = [
-                f'"{threat.descrizione}"' for threat in assigned_threats
-                if threat.id not in threats_with_values_ids
+            if not self.is_enabled:
+                return
+
+            # Vincolo 3 (Modificato): Tutti i controlli dell'ElementType devono essere associati ad almeno una minaccia.
+            # E ogni minaccia deve avere almeno un controllo nella matrice.
+            assigned_controls_ids = self.valori_matrice.values_list('controllo_id', flat=True).distinct()
+            all_controls_for_elementtype = self.controls_assigned_to_elementtype.all()
+
+            controls_not_in_matrix = [
+                f'"{control.nome}"' for control in all_controls_for_elementtype
+                if control.id not in assigned_controls_ids
             ]
 
-            if threats_without_values:
+            if controls_not_in_matrix:
                 error_message = (
-                    "L'ElementType non può essere abilitato perché le seguenti minacce (righe) "
-                    "non hanno nessun controllo associato nella matrice: "
-                    f"{', '.join(threats_without_values)}."
+                    "L'ElementType non può essere abilitato perché i seguenti controlli assegnati "
+                    "non sono presenti nella matrice di rischio (non associati a nessuna minaccia): "
+                    f"{', '.join(controls_not_in_matrix)}."
                 )
                 raise ValidationError({'is_enabled': error_message})
 
@@ -98,7 +112,12 @@ class ElementType(models.Model):
         Per una performance ottimale, il chiamante dovrebbe pre-caricare le relazioni
         con prefetch_related.
         """
-        if self.is_base:
+        if self.nome == "root":
+            # For the special 'root' ElementType, calculate dimension from aggregated values
+            num_minacce = self.valori_matrice.values('minaccia').distinct().count()
+            num_controlli = self.valori_matrice.values('controllo').distinct().count()
+            return f"{num_minacce} x {num_controlli}" if num_minacce or num_controlli else "N/D (Root Aggregato)"
+        elif self.is_base:
             # Per i tipi base, i conteggi sono diretti.
             num_minacce = self.minacce.count()
             num_controlli = self.controls_assigned_to_elementtype.count()
@@ -153,6 +172,26 @@ class ElementType(models.Model):
             if valore_componente > max_valore:
                 max_valore = valore_componente
         return max_valore
+
+    @classmethod
+    def get_aggregated_matrix_values(cls, element_types):
+        """
+        Aggregates matrix values from a list of ElementType instances.
+        For each (minaccia, controllo) pair, takes the maximum value.
+        Returns a dictionary: {(minaccia_id, controllo_id): max_valore}
+        """
+        logging.info(f"--- Aggregating matrix values for ElementTypes: {[et.nome for et in element_types]} ---")
+        aggregated_values = {}
+        # Pre-fetch all ValoreElementType for the given element_types to avoid N+1 queries
+        valori_to_process = ValoreElementType.objects.filter(elementtype__in=element_types).select_related('minaccia', 'controllo')
+
+        for valore_obj in valori_to_process:
+            key = (valore_obj.minaccia_id, valore_obj.controllo_id)
+            logging.info(f"  Processing ValoreElementType: ET={valore_obj.elementtype.nome}, Minaccia={valore_obj.minaccia.descrizione}, Controllo={valore_obj.controllo.nome}, Valore={valore_obj.valore}")
+            aggregated_values[key] = max(aggregated_values.get(key, 0.0), valore_obj.valore)
+            logging.info(f"  Current aggregated value for ({valore_obj.minaccia.descrizione}, {valore_obj.controllo.nome}): {aggregated_values[key]}")
+        logging.info(f"Final aggregated values: {aggregated_values}")
+        return aggregated_values
 
     class Meta:
         verbose_name = "Element Type"

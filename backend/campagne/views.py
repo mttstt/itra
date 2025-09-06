@@ -4,6 +4,7 @@ from .serializers import CampagnaSerializer
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
+from django.db.models import Q
 from assets.models import NodoTemplate, NodoStruttura
 
 class CampagnaViewSet(viewsets.ModelViewSet):
@@ -21,16 +22,20 @@ def campagna_dashboard_view(request, campagna_id):
     # Esegue i conteggi con query separate e più semplici per migliorare le prestazioni.
     # Annotare più conteggi in una singola query può essere molto lento a causa dei JOIN complessi.
     # I related_name sono definiti nei rispettivi modelli e .count() è efficiente.
+    campagna = Campagna.objects.annotate(
+        controlli_count=Count('controlli'),
+        minacce_count=Count('minacce'),
+        scenari_count=Count('scenari'),
+        elementtypes_count=Count('elementtypes'),
+        assets_count=Count('assets'),
 
-    campagna.controlli_count = campagna.controlli.count()
-    campagna.minacce_count = campagna.minacce.count()
-    campagna.scenari_count = campagna.scenari.count()
-    campagna.elementtypes_count = campagna.elementtypes.count()
+        nodistruttura_count = Count('nodistruttura', filter=Q(campagna=campagna)),
+    ).get(pk=campagna_id)
+
     # Aggiungi i conteggi per assets e template di struttura
-    campagna.assets_count = campagna.assets.count()
     campagna.strutture_template_count = campagna.templates_struttura.count()
     campagna.noditemplate_count = NodoTemplate.objects.filter(campagna=campagna).count()
-    campagna.nodistruttura_count = NodoStruttura.objects.filter(campagna=campagna).count()
+
 
     
     context = {

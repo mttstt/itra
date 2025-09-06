@@ -89,6 +89,13 @@ class Campagna(models.Model):
             obj.save()
             elementtype_map[old_id] = obj
 
+        # Assicura che esista un ElementType 'root' per la campagna
+        ElementType.objects.get_or_create(
+            nome='root',
+            campagna=new_campaign,
+            defaults={'descrizione': 'Elemento di tipo root per la campagna'}
+        )
+
         # 4. Clona Controlli (dipendono da ElementTypes)
         for obj in Controllo.objects.filter(campagna__isnull=True):
             old_id = obj.id

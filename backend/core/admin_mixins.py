@@ -54,8 +54,8 @@ class MasterAdminMixin:
 
         if obj_campaign is None and campagna_id_from_url:
             raise PermissionDenied("Non è possibile modificare un record MASTER dall'area di una campagna.")
-        elif obj_campaign is not None:
-            messages.info(request, f"Stai operando su un record appartenente alla campagna: '{obj_campaign}'.")
+        # elif obj_campaign is not None:
+        #     messages.info(request, f"Stai operando su un record appartenente alla campagna: '{obj_campaign}'.")
  
         return super().change_view(request, object_id, form_url, extra_context)
 
@@ -76,13 +76,17 @@ class MasterAdminMixin:
                 try:
                     parsed_url = urlparse(referer)
                     query_params = parse_qs(parsed_url.query)
-                    
+                    print("query_params:", query_params)
+                    print("param_name:", param_name)
+                    print("generic_param:", generic_param)
+    
                     # ...controlla se era nella pagina precedente.
                     campagna_id = query_params.get(param_name, query_params.get(generic_param))
                     if campagna_id:
                         # Esegui il redirect aggiungendo il parametro.
                         new_query_params = request.GET.copy()
-                        new_query_params[param_name] = campagna_id[0]
+                        if param_name not in new_query_params:
+                            new_query_params[param_name] = campagna_id[0]
                         return HttpResponseRedirect(f"{request.path}?{new_query_params.urlencode()}")
                 except Exception:
                     pass # Ignora errori di parsing e procedi
@@ -184,7 +188,8 @@ class MasterAdminMixin:
 
         if "_addanother" in request.POST:
             redirect_url = f"{add_url}?{urlencode(campaign_params)}" if campaign_params else add_url
-            return HttpResponseRedirect(redirect_url)
+            if 'campagna__id__exact' not in redirect_url:
+                return HttpResponseRedirect(redirect_url)
         if "_continue" in request.POST:
             redirect_url = f"{change_url}?{urlencode(campaign_params)}" if campaign_params else change_url
             return HttpResponseRedirect(redirect_url)
@@ -206,8 +211,10 @@ class MasterAdminMixin:
         add_url = reverse(f'admin:{opts.app_label}_{opts.model_name}_add')
         change_url = reverse(f'admin:{opts.app_label}_{opts.model_name}_change', args=[obj.pk])
 
+        redirect_url = ""
         if "_addanother" in request.POST:
             redirect_url = f"{add_url}?{urlencode(campaign_params)}" if campaign_params else add_url
+        if 'campagna__id__exact' not in redirect_url:
             return HttpResponseRedirect(redirect_url)
         if "_continue" in request.POST:
             redirect_url = f"{change_url}?{urlencode(campaign_params)}" if campaign_params else change_url
